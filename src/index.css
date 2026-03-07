@@ -1,19 +1,36 @@
 @import "tailwindcss";
 
-/* Background: White #ffffff
+:root {
+  /* Background */
+  --primaryColor: #ffffff;
+  --secondaryColor: #eaf0fb;
 
-Primary: Navy #1E3A5F
+  /* Brand */
+  --primaryBrand: #1e3a5f;
+  --secondaryBrand: #c9a84c;
+  --accentColor: #4da3ff;
 
-Secondary: Gold #C9A84C
+  /* Text */
+  --primaryText: #000000;
+  --secondaryText: #4a4a4a;
 
-PrimaryText: black #000000
+  /* UI */
+  --neutralColor: #f5f7fa;
+  --surfaceColor: #eaf0fb;
+  --dividerBorder: #eaf0fb;
+}
 
-SecondaryText: dark gray #4A4A4A
+@theme {
+  --color-primaryColor: var(--primaryColor);
+  --color-secondaryColor: var(--secondaryColor);
+  --color-primaryBrand: var(--primaryBrand);
+  --color-secondaryBrand: var(--secondaryBrand);
+  --color-accentColor: var(--accentColor);
 
-Neutral: Light gray #F5F7FA
+  --color-primaryText: var(--primaryText);
+  --color-secondaryText: var(--secondaryText);
 
-Surface: Light Navy Tint #EAF0FB
-
-Accent:
-
-Sky blue #4DA3FF */
+  --color-neutralColor: var(--neutralColor);
+  --color-surfaceColor: var(--surfaceColor);
+  --color-dividerBorder: var(--dividerBorder);
+}
