@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
-import PageLoader from "../components/PageLoader";
+import PageLoader from "../components/common/PageLoader";
 
 export default function ProtectedRoute() {
   // const { user, isAuthenticated } = useSelector((state) => state.auth);

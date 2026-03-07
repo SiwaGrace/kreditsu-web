@@ -1,23 +1,15 @@
 import { Outlet } from "react-router-dom";
-import { Link } from "react-router-dom";
+import Navbar from "../components/layout/main/Navbar";
+import Footer from "../components/layout/main/Footer";
 
 export default function MainLayout() {
   return (
-    <div>
-      <header>
-        <nav>
-          <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
-        </nav>
-      </header>
-
-      <main>
+    <div className="min-h-screen bg-neutralColor text-primaryText flex flex-col">
+      <Navbar />
+      <main className="flex-1">
         <Outlet />
       </main>
-
-      <footer>
-        <p>&copy; {new Date().getFullYear()} Kreditsu. All rights reserved.</p>
-      </footer>
+      <Footer />
     </div>
   );
 }
