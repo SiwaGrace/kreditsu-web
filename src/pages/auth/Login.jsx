@@ -1,11 +1,33 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { login, clearError } from "../../features/auth/authSlices";
 
 const Login = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { loginLoading, error, isAuthenticated } = useSelector(
+    (state) => state.auth,
+  );
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  // redirect to where they were trying to go, or dashboard by default
+  useEffect(() => {
+    if (isAuthenticated) {
+      const from = location.state?.from?.pathname ?? "/dashboard";
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, location]);
+
+  // clear error on unmount
+  useEffect(() => {
+    return () => dispatch(clearError());
+  }, [dispatch]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -14,7 +36,7 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Login form data:", formData);
+    dispatch(login(formData));
   };
 
   return (
@@ -25,6 +47,12 @@ const Login = () => {
           Access your Kreditsu dashboard to manage your credits and payments.
         </p>
       </div>
+
+      {error && (
+        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
@@ -76,9 +104,10 @@ const Login = () => {
 
         <button
           type="submit"
-          className="w-full py-2.5 px-4 rounded-lg bg-primaryBrand text-primaryColor font-medium hover:bg-primaryBrand/90 focus:outline-none focus:ring-2 focus:ring-accentColor/30 focus:ring-offset-2 transition"
+          disabled={loginLoading}
+          className="w-full py-2.5 px-4 rounded-lg bg-primaryBrand text-primaryColor font-medium hover:bg-primaryBrand/90 focus:outline-none focus:ring-2 focus:ring-accentColor/30 focus:ring-offset-2 transition disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          Sign in
+          {loginLoading ? "Signing in..." : "Sign in"}
         </button>
       </form>
 

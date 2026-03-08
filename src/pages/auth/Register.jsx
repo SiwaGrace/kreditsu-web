@@ -1,13 +1,31 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { register, clearError } from "../../features/auth/authSlices";
 
 const Register = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { registerLoading, error, isAuthenticated } = useSelector(
+    (state) => state.auth,
+  );
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     passwordConfirmation: "",
   });
+
+  // redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) navigate("/dashboard", { replace: true });
+  }, [isAuthenticated, navigate]);
+
+  // clear error on unmount
+  useEffect(() => {
+    return () => dispatch(clearError());
+  }, [dispatch]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -16,7 +34,14 @@ const Register = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Register form data:", formData);
+    dispatch(
+      register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        password_confirmation: formData.passwordConfirmation,
+      }),
+    );
   };
 
   return (
@@ -30,6 +55,13 @@ const Register = () => {
           credits in one place.
         </p>
       </div>
+
+      {/* error message */}
+      {error && (
+        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
@@ -110,9 +142,10 @@ const Register = () => {
 
         <button
           type="submit"
-          className="w-full py-2.5 px-4 rounded-lg bg-primaryBrand text-primaryColor font-medium hover:bg-primaryBrand/90 focus:outline-none focus:ring-2 focus:ring-accentColor/30 focus:ring-offset-2 transition"
+          disabled={registerLoading}
+          className="w-full py-2.5 px-4 rounded-lg bg-primaryBrand text-primaryColor font-medium hover:bg-primaryBrand/90 focus:outline-none focus:ring-2 focus:ring-accentColor/30 focus:ring-offset-2 transition disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          Create account
+          {registerLoading ? "Creating account..." : "Create account"}
         </button>
       </form>
 
