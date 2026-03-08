@@ -2,7 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 
 import MainLayout from "../layouts/MainLayout";
 import AuthLayout from "../layouts/AuthLayout";
-import DashboardLayout from "../layouts/DashboardLayout";
+import SMELayout from "../layouts/SMELayout";
 
 import { RouterProvider } from "react-router-dom";
 
@@ -11,8 +11,8 @@ import ProtectedRoute from "./ProtectedRoute";
 import Root from "../Root";
 
 // public pages
-import HomePage from "../pages/HomePage";
-import AboutPage from "../pages/AboutPage";
+import HomePage from "../pages/public/HomePage";
+import AboutPage from "../pages/public/AboutPage";
 import NotFound from "../pages/NotFound";
 import UnauthorizedPage from "../pages/UnauthorizedPage";
 
@@ -23,8 +23,11 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import ResetPassword from "../pages/auth/ResetPassword";
 
 // protected pages
-import Dashboard from "../pages/Dashboard";
-import Profile from "../pages/Profile";
+import Dashboard from "../pages/sme/DashboardPage";
+import Profile from "../pages/sme/ProfilePage";
+import ExpensesPage from "../pages/sme/ExpensesPage";
+import SalesPage from "../pages/sme/SalesPage";
+import BusinessProfilePage from "../pages/sme/BusinessProfilePage";
 
 const router = createBrowserRouter([
   {
@@ -75,9 +78,12 @@ const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           {
-            element: <DashboardLayout />,
+            element: <SMELayout />,
             children: [
               { path: "dashboard", element: <Dashboard /> },
+              { path: "my-business", element: <BusinessProfilePage /> },
+              { path: "sales", element: <SalesPage /> },
+              { path: "expenses", element: <ExpensesPage /> },
               { path: "profile", element: <Profile /> },
             ],
           },
