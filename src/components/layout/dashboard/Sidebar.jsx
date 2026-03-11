@@ -33,13 +33,16 @@ export default function Sidebar({
         <div className="mx-3 mb-3 rounded-xl bg-white/10 px-3 py-3">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#c9a84c] text-white text-sm font-semibold">
-              {getInitials("Mama Cee")}
+              {getInitials(business.business?.name || "Mama Cee test")}
             </div>
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-white">
-                Mama Cee
+                {business.business?.name || "Mama Cee Test Groceries"}
               </p>
-              <p className="truncate text-xs text-white/60">Retail · Accra</p>
+              <p className="truncate text-xs text-white/60">
+                {business.business?.industry || "Retail"} ·{" "}
+                {business.business?.location || "Accra"}
+              </p>
             </div>
           </div>
         </div>

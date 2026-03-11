@@ -23,6 +23,9 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import ResetPassword from "../pages/auth/ResetPassword";
 
 // protected pages
+import OnboardingPage from "../pages/sme/OnboardingPage";
+// BusinessGuard will check if user has a business and redirect to onboarding if not
+import BusinessGuard from "../router/BusinessGuard";
 import Dashboard from "../pages/sme/DashboardPage";
 import Profile from "../pages/sme/ProfilePage";
 import ExpensesPage from "../pages/sme/ExpensesPage";
@@ -77,14 +80,26 @@ const router = createBrowserRouter([
       {
         element: <ProtectedRoute />,
         children: [
+          // onboarding — auth required but no business required
           {
-            element: <SMELayout />,
+            path: "onboarding",
+            element: <OnboardingPage />,
+          },
+
+          // dashboard — auth + business required
+          {
+            element: <BusinessGuard />,
             children: [
-              { path: "dashboard", element: <Dashboard /> },
-              { path: "my-business", element: <BusinessProfilePage /> },
-              { path: "sales", element: <SalesPage /> },
-              { path: "expenses", element: <ExpensesPage /> },
-              { path: "profile", element: <Profile /> },
+              {
+                element: <SMELayout />,
+                children: [
+                  { path: "dashboard", element: <Dashboard /> },
+                  { path: "my-business", element: <BusinessProfilePage /> },
+                  { path: "sales", element: <SalesPage /> },
+                  { path: "expenses", element: <ExpensesPage /> },
+                  { path: "profile", element: <Profile /> },
+                ],
+              },
             ],
           },
         ],

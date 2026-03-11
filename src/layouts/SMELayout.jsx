@@ -33,7 +33,8 @@ export default function SMELayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logoutLoading } = useSelector((state) => state.auth);
-  const business = true; // replace with useSelector((state) => state.business.business)
+  // const business = true; // replace with
+  const business = useSelector((state) => state.business);
 
   const pageTitle = PAGE_TITLES[location.pathname] ?? "Dashboard";
 

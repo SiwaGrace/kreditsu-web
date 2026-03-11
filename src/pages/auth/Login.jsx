@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { login, clearError } from "../../features/auth/authSlices";
+import { fetchBusiness } from "../../features/businessSlices";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -16,14 +17,6 @@ const Login = () => {
     password: "",
   });
 
-  // redirect to where they were trying to go, or dashboard by default
-  useEffect(() => {
-    if (isAuthenticated) {
-      const from = location.state?.from?.pathname ?? "/dashboard";
-      navigate(from, { replace: true });
-    }
-  }, [isAuthenticated, navigate, location]);
-
   // clear error on unmount
   useEffect(() => {
     return () => dispatch(clearError());
@@ -34,9 +27,21 @@ const Login = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(login(formData));
+    try {
+      await dispatch(login(formData)).unwrap();
+      const result = await dispatch(fetchBusiness());
+      const from = location.state?.from?.pathname;
+
+      if (result.meta.requestStatus === "fulfilled") {
+        // has business — go where they were headed or dashboard
+        navigate(from ?? "/dashboard", { replace: true });
+      } else {
+        // no business — onboarding first
+        navigate("/onboarding", { replace: true });
+      }
+    } catch {}
   };
 
   return (

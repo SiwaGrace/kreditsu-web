@@ -38,10 +38,10 @@ export default function Topbar({
         {business && (
           <div className="flex items-center gap-2 rounded-full bg-[#eaf0fb] px-3 py-1 lg:hidden">
             <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#c9a84c] text-white text-[10px] font-semibold">
-              {getInitials("Mama Cee")}
+              {getInitials(business.business?.name || "Mama Cee Test")}
             </div>
             <span className="text-xs font-medium text-[#1e3a5f]">
-              {"Mama Cee"}
+              {business.business?.name || "Mama Cee Test Groceries"}
             </span>
           </div>
         )}

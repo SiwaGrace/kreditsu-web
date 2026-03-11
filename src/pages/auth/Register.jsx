@@ -32,16 +32,19 @@ const Register = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(
-      register({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        password_confirmation: formData.passwordConfirmation,
-      }),
-    );
+    try {
+      await dispatch(
+        register({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          passwordConfirmation: formData.passwordConfirmation,
+        }),
+      ).unwrap();
+      navigate("/onboarding", { replace: true });
+    } catch (error) {}
   };
 
   return (
