@@ -10,10 +10,12 @@ export default defineConfig({
       "/api": {
         target: "http://kreditsu-api.test",
         changeOrigin: true,
+        secure: false,
       },
       "/sanctum": {
         target: "http://kreditsu-api.test",
         changeOrigin: true,
+        secure: false,
       },
     },
   },
