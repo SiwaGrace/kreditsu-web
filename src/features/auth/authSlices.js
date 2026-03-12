@@ -5,6 +5,7 @@ import {
   loginRequest,
   logoutRequest,
   fetchUserRequest,
+  updateUserRequest,
 } from "../../api/auth.api";
 
 // ─── Thunks ────────────
@@ -59,6 +60,20 @@ export const logout = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
   }
 });
 
+export const updateUser = createAsyncThunk(
+  "auth/updateUser",
+  async (userData, thunkAPI) => {
+    try {
+      const data = await updateUserRequest(userData);
+      return data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.message ?? "Failed to update profile",
+      );
+    }
+  },
+);
+
 // ─── Initial State ──────────
 const initialState = {
   user: null,
@@ -70,6 +85,7 @@ const initialState = {
   loginLoading: false,
   registerLoading: false,
   logoutLoading: false,
+  updateLoading: false,
 };
 
 // ─── Slice ──────────
@@ -151,6 +167,22 @@ export const authSlice = createSlice({
       })
       .addCase(logout.rejected, (state, action) => {
         state.logoutLoading = false;
+        state.error = action.payload;
+      });
+
+    // ── updateUser ──────────────────────────────────────────────────────────
+    builder
+      .addCase(updateUser.pending, (state) => {
+        state.updateLoading = true;
+        state.error = null;
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.user = action.payload?.user ?? action.payload ?? state.user;
+        state.updateLoading = false;
+        state.message = action.payload?.message ?? null;
+      })
+      .addCase(updateUser.rejected, (state, action) => {
+        state.updateLoading = false;
         state.error = action.payload;
       });
   },

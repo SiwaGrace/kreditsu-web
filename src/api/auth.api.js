@@ -28,6 +28,11 @@ export const fetchUserRequest = async () => {
   return res.data;
 };
 
+export const updateUserRequest = async (data) => {
+  const res = await api.patch("/user", data);
+  return res.data;
+};
+
 // not done yet, just placeholders for now
 export const forgotPasswordRequest = async () => {};
 

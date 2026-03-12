@@ -19,6 +19,7 @@ export default function BusinessProfilePage() {
     established_at: "",
     is_published: false,
   });
+  const [slug, setSlug] = useState("");
   const [savedMessage, setSavedMessage] = useState("");
 
   // Ensure we have the latest business data when landing on this page
@@ -44,6 +45,7 @@ export default function BusinessProfilePage() {
         established_at: business.established_at ?? "",
         is_published: Boolean(business.is_published),
       }));
+      setSlug(business.slug ?? "");
     }
   }, [business]);
 
@@ -131,6 +133,23 @@ export default function BusinessProfilePage() {
               className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#4da3ff] focus:ring-2 focus:ring-[#4da3ff]/20"
               placeholder="e.g. Mama Cee Groceries"
             />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-[#1e3a5f]">
+              Business slug
+            </label>
+            <input
+              name="slug"
+              value={slug}
+              readOnly
+              disabled
+              className="w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-500"
+            />
+            <p className="mt-0.5 text-xs text-gray-500">
+              This is the permanent identifier used in your public URL and
+              cannot be changed.
+            </p>
           </div>
 
           <div>
