@@ -13,6 +13,8 @@ import Root from "../Root";
 // public pages
 import HomePage from "../pages/public/HomePage";
 import AboutPage from "../pages/public/AboutPage";
+import BusinessDirectory from "../pages/public/BusinessDirectory";
+import BusinessProfile from "../pages/public/BusinessProfile";
 import NotFound from "../pages/NotFound";
 import UnauthorizedPage from "../pages/UnauthorizedPage";
 
@@ -48,6 +50,14 @@ const router = createBrowserRouter([
           {
             path: "about",
             element: <AboutPage />,
+          },
+          {
+            path: "directory",
+            element: <BusinessDirectory />,
+          },
+          {
+            path: "b/:slug",
+            element: <BusinessProfile />,
           },
         ],
       },

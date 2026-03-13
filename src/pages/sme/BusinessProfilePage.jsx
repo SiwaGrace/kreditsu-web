@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { editBusiness, fetchBusiness } from "../../features/businessSlices";
+import KreditsuScoreCard from "../../components/ui/KreditsuScoreCard";
 
 export default function BusinessProfilePage() {
   const dispatch = useDispatch();
@@ -103,6 +104,8 @@ export default function BusinessProfilePage() {
           partners understand who you are.
         </p>
       </div>
+
+      <KreditsuScoreCard score={business.kreditsu_score ?? 0} />
 
       {error && (
         <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">

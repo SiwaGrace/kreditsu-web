@@ -1,0 +1,112 @@
+/**
+ * Kreditsu Score card — fintech credit-style score for SMEs.
+ * Accepts a single score (0–100) and derives badge tier and sub-score breakdown.
+ * Tailwind only; no external libraries.
+ */
+const SUB_SCORES = [
+  { label: "Profile Completeness", max: 10 },
+  { label: "Transaction History", max: 40 },
+  { label: "Revenue", max: 30 },
+  { label: "Expense Management", max: 20 },
+];
+
+function getTier(score) {
+  const n = Math.max(0, Math.min(100, Number(score) || 0));
+  if (n >= 70) return { label: "Gold", color: "#c9a84c" };
+  if (n >= 40) return { label: "Silver", color: "#a8a9ad" };
+  return { label: "Bronze", color: "#cd7f32" };
+}
+
+function getSubScores(score) {
+  const total = Math.max(0, Math.min(100, Number(score) || 0));
+  const ratio = total / 100;
+  return SUB_SCORES.map(({ label, max }) => ({
+    label,
+    max,
+    earned: Math.round(ratio * max * 10) / 10,
+  }));
+}
+
+export default function KreditsuScoreCard({ score = 0 }) {
+  const numericScore = Math.max(0, Math.min(100, Number(score) || 0));
+  const tier = getTier(numericScore);
+  const subScores = getSubScores(numericScore);
+  const circumference = 2 * Math.PI * 42;
+  const strokeDashoffset = circumference - (numericScore / 100) * circumference;
+
+  return (
+    <div className="rounded-2xl border border-[#eaf0fb] bg-white p-6 shadow-sm">
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-[#1e3a5f]">
+          Kreditsu Score
+        </h3>
+        <span
+          className="rounded-full px-2.5 py-0.5 text-xs font-semibold text-white"
+          style={{ backgroundColor: tier.color }}
+        >
+          {tier.label}
+        </span>
+      </div>
+
+      <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
+        {/* Circular score */}
+        <div className="relative shrink-0">
+          <svg
+            className="h-28 w-28 -rotate-90"
+            viewBox="0 0 100 100"
+            aria-hidden
+          >
+            <circle
+              cx="50"
+              cy="50"
+              r="42"
+              fill="none"
+              stroke="#eaf0fb"
+              strokeWidth="8"
+            />
+            <circle
+              cx="50"
+              cy="50"
+              r="42"
+              fill="none"
+              stroke="#4da3ff"
+              strokeWidth="8"
+              strokeLinecap="round"
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+              className="transition-[stroke-dashoffset] duration-500"
+            />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-2xl font-bold text-[#1e3a5f]">
+              {Math.round(numericScore)}
+            </span>
+          </div>
+        </div>
+
+        {/* Sub-scores breakdown */}
+        <div className="min-w-0 flex-1 space-y-3">
+          {subScores.map(({ label, max, earned }) => {
+            const pct = max > 0 ? (earned / max) * 100 : 0;
+            return (
+              <div key={label} className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span className="font-medium text-[#1e3a5f]">{label}</span>
+                  <span className="text-gray-500">
+                    {earned.toFixed(1)} / {max}
+                  </span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#f5f7fa]">
+                  <div
+                    className="h-full rounded-full bg-[#4da3ff] transition-[width] duration-500"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}

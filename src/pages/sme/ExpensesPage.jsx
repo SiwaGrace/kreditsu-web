@@ -82,15 +82,13 @@ export default function ExpensesPage() {
 
       <div className="rounded-2xl bg-white p-4 shadow-sm">
         {loading ? (
-          <div className="flex min-h-[160px] items-center justify-center">
+          <div className="flex min-h-40 items-center justify-center">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#4da3ff] border-t-transparent" />
           </div>
         ) : items.length === 0 ? (
           <div className="py-10 text-center text-sm text-gray-500">
             No expenses recorded yet. Click{" "}
-            <span className="font-medium text-[#1e3a5f]">
-              “Record expense”
-            </span>{" "}
+            <span className="font-medium text-[#1e3a5f]">“Record expense”</span>{" "}
             to add your first one.
           </div>
         ) : (
