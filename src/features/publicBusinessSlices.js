@@ -39,6 +39,7 @@ const initialState = {
   hasMore: false,
 
   business: null,
+  isActiveTrader: false,
   businessLoading: false,
   businessError: null,
 };
@@ -86,11 +87,13 @@ export const publicBusinessSlice = createSlice({
         state.businessLoading = false;
         const payload = action.payload ?? null;
         state.business = payload?.business ?? payload ?? null;
+        state.isActiveTrader = payload?.is_active_trader ?? false;
       })
       .addCase(fetchPublicBusinessBySlug.rejected, (state, action) => {
         state.businessLoading = false;
         state.businessError = action.payload;
         state.business = null;
+        state.isActiveTrader = false;
       });
   },
 });

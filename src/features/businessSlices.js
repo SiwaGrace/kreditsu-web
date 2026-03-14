@@ -58,6 +58,9 @@ export const editBusiness = createAsyncThunk(
 // ─── Initial State ──────────
 const initialState = {
   business: null,
+  totalSales: 0,
+  totalExpenses: 0,
+  net: 0,
   hasBusiness: false, //businessChecked is true. true means business exists, false means it doesn't.
   businessChecked: false, // have we checked if user has a business yet|have we made the API call yet?
   message: null,
@@ -89,12 +92,18 @@ export const businessSlice = createSlice({
       .addCase(fetchBusiness.fulfilled, (state, action) => {
         if (!action.payload) return; // ← guard against undefined payload
         state.business = action.payload.business ?? null;
+        state.totalSales = action.payload.total_sales ?? 0;
+        state.totalExpenses = action.payload.total_expenses ?? 0;
+        state.net = action.payload.net ?? 0;
         state.hasBusiness = true;
         state.businessChecked = true;
         state.loading = false;
       })
       .addCase(fetchBusiness.rejected, (state, action) => {
         state.business = null;
+        state.totalSales = 0;
+        state.totalExpenses = 0;
+        state.net = 0;
         state.hasBusiness = false;
         state.businessChecked = true; // checked but no business found
         state.loading = false;

@@ -6,6 +6,7 @@ import {
   logoutRequest,
   fetchUserRequest,
   updateUserRequest,
+  deleteAccountRequest,
 } from "../../api/auth.api";
 
 // ─── Thunks ────────────
@@ -24,9 +25,14 @@ export const fetchUser = createAsyncThunk(
 
 export const register = createAsyncThunk(
   "auth/register",
-  async (userData, thunkAPI) => {
+  async ({ passwordConfirmation, ...rest }, thunkAPI) => {
     try {
-      const data = await registerRequest(userData);
+      const payload = {
+        ...rest,
+        password_confirmation: passwordConfirmation,
+      };
+
+      const data = await registerRequest(payload);
       return data;
     } catch (err) {
       return thunkAPI.rejectWithValue(
@@ -74,6 +80,19 @@ export const updateUser = createAsyncThunk(
   },
 );
 
+export const deleteAccount = createAsyncThunk(
+  "auth/deleteAccount",
+  async (_, thunkAPI) => {
+    try {
+      await deleteAccountRequest();
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.message ?? "Failed to delete account",
+      );
+    }
+  },
+);
+
 // ─── Initial State ──────────
 const initialState = {
   user: null,
@@ -86,6 +105,7 @@ const initialState = {
   registerLoading: false,
   logoutLoading: false,
   updateLoading: false,
+  deleteLoading: false,
 };
 
 // ─── Slice ──────────
@@ -183,6 +203,23 @@ export const authSlice = createSlice({
       })
       .addCase(updateUser.rejected, (state, action) => {
         state.updateLoading = false;
+        state.error = action.payload;
+      });
+
+    // ── deleteAccount ───────────────────────────────────────────────────────
+    builder
+      .addCase(deleteAccount.pending, (state) => {
+        state.deleteLoading = true;
+        state.error = null;
+      })
+      .addCase(deleteAccount.fulfilled, (state) => {
+        state.user = null;
+        state.isAuthenticated = false;
+        state.deleteLoading = false;
+        state.message = "Account deleted successfully.";
+      })
+      .addCase(deleteAccount.rejected, (state, action) => {
+        state.deleteLoading = false;
         state.error = action.payload;
       });
   },

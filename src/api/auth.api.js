@@ -33,6 +33,11 @@ export const updateUserRequest = async (data) => {
   return res.data;
 };
 
+export const deleteAccountRequest = async () => {
+  const res = await api.delete("/user");
+  return res.data;
+};
+
 // not done yet, just placeholders for now
 export const forgotPasswordRequest = async () => {};
 

@@ -1,8 +1,3 @@
-/**
- * Kreditsu Score card — fintech credit-style score for SMEs.
- * Accepts a single score (0–100) and derives badge tier and sub-score breakdown.
- * Tailwind only; no external libraries.
- */
 const SUB_SCORES = [
   { label: "Profile Completeness", max: 10 },
   { label: "Transaction History", max: 40 },

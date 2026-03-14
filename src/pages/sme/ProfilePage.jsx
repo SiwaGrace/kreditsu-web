@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { logout, updateUser } from "../../features/auth/authSlices";
+import { toast } from "react-hot-toast";
+import {
+  logout,
+  updateUser,
+  deleteAccount,
+} from "../../features/auth/authSlices";
+import Modal from "../../components/common/Modal";
 
 function getInitials(user) {
   if (!user?.name || typeof user.name !== "string") return "U";
@@ -14,12 +20,12 @@ function getInitials(user) {
 export default function ProfilePage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user, updateLoading, logoutLoading, error, message } = useSelector(
-    (state) => state.auth,
-  );
+  const { user, updateLoading, logoutLoading, deleteLoading, error, message } =
+    useSelector((state) => state.auth);
 
   const [formValues, setFormValues] = useState({ name: "", email: "" });
   const [savedMessage, setSavedMessage] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -61,14 +67,22 @@ export default function ProfilePage() {
   };
 
   const handleDeleteAccount = () => {
-    // UI only — no API call. Could open a confirmation modal or link to a future delete flow.
-    if (
-      window.confirm(
-        "Are you sure you want to delete your account? This action cannot be undone. (Delete account is not yet connected to an API.)",
-      )
-    ) {
-      // Placeholder: no API call
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setShowDeleteModal(false);
+    try {
+      await dispatch(deleteAccount()).unwrap();
+      toast.success("Account deleted successfully.");
+      navigate("/auth/login", { replace: true });
+    } catch (err) {
+      toast.error(err ?? "Failed to delete account.");
     }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
   };
 
   if (!user) {
@@ -185,11 +199,27 @@ export default function ProfilePage() {
         <button
           type="button"
           onClick={handleDeleteAccount}
-          className="mt-4 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
+          disabled={deleteLoading}
+          className="mt-4 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
         >
-          Delete account
+          {deleteLoading ? "Deleting…" : "Delete account"}
         </button>
       </div>
+
+      <Modal
+        isOpen={showDeleteModal}
+        title="Delete account"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        confirmLabel="Delete account"
+        cancelLabel="Cancel"
+        confirmLoading={deleteLoading}
+      >
+        <p className="text-sm text-gray-700">
+          Are you sure you want to delete your account? This action cannot be
+          undone.
+        </p>
+      </Modal>
     </div>
   );
 }

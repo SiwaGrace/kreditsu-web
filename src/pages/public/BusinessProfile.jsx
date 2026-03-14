@@ -1,15 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { FaPhone, FaEnvelope, FaGlobe, FaCheckCircle } from "react-icons/fa";
+import { FiLink, FiCheck, FiFileText, FiLogIn } from "react-icons/fi";
 import { fetchPublicBusinessBySlug } from "../../features/publicBusinessSlices";
+import { formatDate } from "../../utils/formatDate";
 
 const BusinessProfile = () => {
   const { slug } = useParams();
   const dispatch = useDispatch();
-  const { business, businessLoading, businessError } = useSelector(
-    (state) => state.publicBusiness,
-  );
+  const { business, isActiveTrader, businessLoading, businessError } =
+    useSelector((state) => state.publicBusiness);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (slug) {
@@ -20,7 +22,8 @@ const BusinessProfile = () => {
   const copyLink = () => {
     const url = window.location.href;
     navigator.clipboard.writeText(url);
-    alert("Link copied to clipboard");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   if (businessLoading) {
@@ -67,22 +70,28 @@ const BusinessProfile = () => {
               .join("")
               .toUpperCase()}
           </div>
-          <h1 className="mt-4 text-2xl font-semibold text-[#1e3a5f]">
+          <h1 className="mt-4 text-2xl font-semibold text-[#1e3a5f] flex items-center ">
             {business.name}
+            {business.is_verified && (
+              <FaCheckCircle className="ml-2 text-[#c9a84c]" />
+            )}
           </h1>
           <p className="text-gray-600">
             {business.industry} · {business.location}
           </p>
           {business.is_verified && (
             <div className="mt-2 inline-flex items-center text-[#c9a84c] font-semibold">
-              <FaCheckCircle className="mr-1" /> ✓ Verified
+              ✓ Verified
             </div>
-          )}
+          )}{" "}
           <button
             onClick={copyLink}
-            className="mt-4 px-4 py-2 bg-[#4da3ff] text-white rounded-md text-sm"
+            className={`flex items-center gap-2 rounded-lg border border-[#eaf0fb] px-4 py-2 text-sm font-medium text-[#1e3a5f] hover:bg-[#eaf0fb] transition-colors ${
+              copied ? "text-green-500" : ""
+            }`}
           >
-            Share profile
+            {copied ? <FiCheck size={16} /> : <FiLink size={16} />}
+            {copied ? "Copied!" : "Copy link"}
           </button>
         </div>
 
@@ -129,10 +138,29 @@ const BusinessProfile = () => {
           <div className="bg-[#f5f7fa] p-3 rounded">
             <div className="text-sm text-gray-600">Member since</div>
             <div className="font-semibold">
-              {business.member_since || "N/A"}
+              {formatDate(business.created_at) || "N/A"}
             </div>
           </div>
+
           <div className="bg-[#f5f7fa] p-3 rounded">
+            <div className="text-sm text-gray-600">Transaction activity</div>
+            <div className="font-semibold">
+              {isActiveTrader ? (
+                <span className="flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-600">
+                  <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                  Active seller
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-red-600">
+                  <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+                  Not Active seller
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* only visible to lender */}
+          {/* <div className="bg-[#f5f7fa] p-3 rounded">
             <div className="text-sm text-gray-600">Monthly revenue</div>
             <div className="font-semibold">
               {business.monthly_revenue
@@ -151,7 +179,7 @@ const BusinessProfile = () => {
             <div className="font-semibold">
               {business.expense_ratio ? `${business.expense_ratio}%` : "N/A"}
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* contact */}

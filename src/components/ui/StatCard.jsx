@@ -14,9 +14,7 @@ export default function StatCard({ title, value, subtitle, children }) {
           <span className="text-2xl font-bold text-[#1e3a5f]">{value}</span>
         )}
       </div>
-      {subtitle && (
-        <p className="mt-1 text-xs text-gray-500">{subtitle}</p>
-      )}
+      {subtitle && <p className="mt-1 text-xs text-gray-500">{subtitle}</p>}
     </div>
   );
 }

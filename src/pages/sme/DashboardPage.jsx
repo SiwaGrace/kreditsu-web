@@ -23,7 +23,12 @@ function getScoreTier(score) {
 export default function DashboardPage() {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { business } = useSelector((state) => state.business);
+  const {
+    business,
+    totalSales: salesTotal,
+    totalExpenses: expensesTotal,
+    net,
+  } = useSelector((state) => state.business);
   const { items: sales } = useSelector((state) => state.sales);
   const { items: expenses } = useSelector((state) => state.expenses);
 
@@ -34,11 +39,6 @@ export default function DashboardPage() {
 
   const score = business?.kreditsu_score ?? 0;
   const tier = getScoreTier(score);
-  const salesTotal = sales.reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
-  const expensesTotal = expenses.reduce(
-    (sum, e) => sum + (Number(e.amount) || 0),
-    0,
-  );
 
   const quickLinks = [
     { to: "/my-business", label: "My Business", desc: "Profile & details" },
@@ -69,10 +69,7 @@ export default function DashboardPage() {
           subtitle={
             <span>
               Tier:{" "}
-              <span
-                className="font-medium"
-                style={{ color: tier.color }}
-              >
+              <span className="font-medium" style={{ color: tier.color }}>
                 {tier.label}
               </span>
             </span>
@@ -91,7 +88,7 @@ export default function DashboardPage() {
         <StatCard
           title="Net"
           subtitle="Sales minus expenses"
-          value={formatCurrency(salesTotal - expensesTotal)}
+          value={formatCurrency(net)}
         />
       </div>
 
@@ -152,48 +149,49 @@ export default function DashboardPage() {
             </div>
           ) : (
             <ul className="space-y-2">
-              {[...sales.slice(0, 3).map((s) => ({ ...s, type: "sale" })), ...expenses.slice(0, 3).map((e) => ({ ...e, type: "expense" }))]
-                    .sort(
-                      (a, b) =>
-                        new Date(b.date || 0) - new Date(a.date || 0)
-                    )
-                    .slice(0, 5)
-                    .map((item, i) => (
-                      <li
-                        key={item.id ?? `${item.type}-${i}-${item.amount}`}
-                        className="flex items-center justify-between rounded-lg border border-[#eaf0fb] px-3 py-2"
+              {[
+                ...sales.slice(0, 3).map((s) => ({ ...s, type: "sale" })),
+                ...expenses.slice(0, 3).map((e) => ({ ...e, type: "expense" })),
+              ]
+                .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
+                .slice(0, 5)
+                .map((item, i) => (
+                  <li
+                    key={item.id ?? `${item.type}-${i}-${item.amount}`}
+                    className="flex items-center justify-between rounded-lg border border-[#eaf0fb] px-3 py-2"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-medium ${
+                          item.type === "sale"
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-amber-100 text-amber-700"
+                        }`}
                       >
-                        <div className="flex items-center gap-3">
-                          <span
-                            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-medium ${
-                              item.type === "sale"
-                                ? "bg-emerald-100 text-emerald-700"
-                                : "bg-amber-100 text-amber-700"
-                            }`}
-                          >
-                            {item.type === "sale" ? "+" : "−"}
-                          </span>
-                          <div>
-                            <p className="text-sm font-medium text-[#1e3a5f]">
-                              {item.description || (item.type === "sale" ? "Sale" : "Expense")}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {item.date ?? "—"}
-                            </p>
-                          </div>
-                        </div>
-                        <span
-                          className={`text-sm font-semibold ${
-                            item.type === "sale"
-                              ? "text-emerald-600"
-                              : "text-amber-600"
-                          }`}
-                        >
-                          {item.type === "sale" ? "+" : "−"}
-                          {formatCurrency(Number(item.amount) || 0)}
-                        </span>
-                      </li>
-                    ))}
+                        {item.type === "sale" ? "+" : "−"}
+                      </span>
+                      <div>
+                        <p className="text-sm font-medium text-[#1e3a5f]">
+                          {item.description ||
+                            (item.type === "sale" ? "Sale" : "Expense")}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {item.date ?? "—"}
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      className={`text-sm font-semibold ${
+                        item.type === "sale"
+                          ? "text-emerald-600"
+                          : "text-amber-600"
+                      }`}
+                    >
+                      {item.type === "sale" ? "+" : "−"}
+                      {formatCurrency(Number(item.amount) || 0)}
+                    </span>
+                  </li>
+                ))}
             </ul>
           )}
         </div>

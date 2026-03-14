@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-hot-toast";
 import { editBusiness, fetchBusiness } from "../../features/businessSlices";
 import KreditsuScoreCard from "../../components/ui/KreditsuScoreCard";
 
@@ -22,6 +23,7 @@ export default function BusinessProfilePage() {
   });
   const [slug, setSlug] = useState("");
   const [savedMessage, setSavedMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Ensure we have the latest business data when landing on this page
   useEffect(() => {
@@ -62,12 +64,17 @@ export default function BusinessProfilePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSavedMessage("");
+    setIsSubmitting(true);
 
     try {
       await dispatch(editBusiness(formValues)).unwrap();
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Ensure loading shows for at least 1s
       setSavedMessage("Business details updated successfully.");
+      toast.success("Business details updated successfully.");
     } catch {
       // error is handled in slice and surfaced via `error`
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -288,10 +295,10 @@ export default function BusinessProfilePage() {
         <div className="flex items-center justify-end gap-3 pt-2">
           <button
             type="submit"
-            disabled={updateLoading}
+            disabled={updateLoading || isSubmitting}
             className="inline-flex items-center rounded-lg bg-[#1e3a5f] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#162d4a] disabled:opacity-50"
           >
-            {updateLoading ? "Saving changes…" : "Save changes"}
+            {updateLoading || isSubmitting ? "Saving changes…" : "Save changes"}
           </button>
         </div>
       </form>
