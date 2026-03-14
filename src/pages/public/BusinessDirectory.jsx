@@ -1,62 +1,7 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { FaCheckCircle } from "react-icons/fa";
-
-const SAMPLE_BUSINESSES = [
-  {
-    id: 1,
-    name: "Mama Cee Groceries",
-    industry: "Retail",
-    location: "Accra, Ghana",
-    score: 78,
-    verified: true,
-    slug: "mamacee-groceries",
-  },
-  {
-    id: 2,
-    name: "Delta Foods",
-    industry: "Food",
-    location: "Lagos, Nigeria",
-    score: 92,
-    verified: true,
-    slug: "delta-foods",
-  },
-  {
-    id: 3,
-    name: "Sunny Services",
-    industry: "Services",
-    location: "Nairobi, Kenya",
-    score: 54,
-    verified: false,
-    slug: "sunny-services",
-  },
-  {
-    id: 4,
-    name: "AgriCo",
-    industry: "Agriculture",
-    location: "Kampala, Uganda",
-    score: 33,
-    verified: false,
-    slug: "agrico",
-  },
-  {
-    id: 5,
-    name: "SteelWorks Ltd.",
-    industry: "Manufacturing",
-    location: "Lusaka, Zambia",
-    score: 85,
-    verified: true,
-    slug: "steelworks-ltd",
-  },
-  {
-    id: 6,
-    name: "Urban Retailers",
-    industry: "Retail",
-    location: "Accra, Ghana",
-    score: 60,
-    verified: false,
-    slug: "urban-retailers",
-  },
-];
+import { fetchPublicBusinesses } from "../../features/publicBusinessSlices";
 
 const FILTERS = [
   "All",
@@ -68,11 +13,22 @@ const FILTERS = [
 ];
 
 const BusinessDirectory = () => {
+  const dispatch = useDispatch();
+  const {
+    list: businesses,
+    listLoading,
+    listError,
+  } = useSelector((state) => state.publicBusiness);
+
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
 
+  useEffect(() => {
+    dispatch(fetchPublicBusinesses());
+  }, [dispatch]);
+
   const filtered = useMemo(() => {
-    let list = SAMPLE_BUSINESSES;
+    let list = businesses;
     if (filter !== "All") {
       list = list.filter((b) => b.industry === filter);
     }
@@ -86,7 +42,7 @@ const BusinessDirectory = () => {
       );
     }
     return list;
-  }, [search, filter]);
+  }, [search, filter, businesses]);
 
   return (
     <div className="min-h-screen bg-[#f5f7fa] py-8 px-4">
@@ -126,7 +82,13 @@ const BusinessDirectory = () => {
         </div>
 
         {/* results */}
-        {filtered.length === 0 ? (
+        {listLoading ? (
+          <p className="text-center text-gray-500">Loading businesses...</p>
+        ) : listError ? (
+          <p className="text-center text-red-500">
+            Error loading businesses: {listError}
+          </p>
+        ) : filtered.length === 0 ? (
           <p className="text-center text-gray-500">
             No businesses found matching your search
           </p>
@@ -145,7 +107,7 @@ const BusinessDirectory = () => {
                         .map((w) => w[0])
                         .join("")}
                     </div>
-                    {b.verified && (
+                    {b.is_verified && (
                       <FaCheckCircle
                         className="text-[#c9a84c] ml-2"
                         title="Verified"
@@ -164,7 +126,7 @@ const BusinessDirectory = () => {
                   <div className="w-full bg-[#eaf0fb] rounded-full h-2">
                     <div
                       className="bg-[#4da3ff] h-2 rounded-full"
-                      style={{ width: `${b.score}%` }}
+                      style={{ width: `${b.kreditsu_score}%` }}
                     ></div>
                   </div>
                 </div>
