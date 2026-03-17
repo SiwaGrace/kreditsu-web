@@ -2,12 +2,25 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
 import { editBusiness, fetchBusiness } from "../../features/businessSlices";
+import {
+  fetchBusinessDocuments,
+  addBusinessDocument,
+  removeBusinessDocument,
+} from "../../features/businessDocumentsSlices";
 import KreditsuScoreCard from "../../components/ui/KreditsuScoreCard";
+import { formatDate } from "../../utils/formatDate";
 
 export default function BusinessProfilePage() {
   const dispatch = useDispatch();
   const { business, loading, updateLoading, error, businessChecked } =
     useSelector((state) => state.business);
+  const {
+    items: documents,
+    loading: docsLoading,
+    createLoading: docsUploading,
+    deleteLoading: docsDeleting,
+    error: docsError,
+  } = useSelector((state) => state.businessDocuments);
 
   const [formValues, setFormValues] = useState({
     name: "",
@@ -25,12 +38,22 @@ export default function BusinessProfilePage() {
   const [savedMessage, setSavedMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [docType, setDocType] = useState("registration_certificate");
+  const [docFile, setDocFile] = useState(null);
+  const [docsMessage, setDocsMessage] = useState("");
+
   // Ensure we have the latest business data when landing on this page
   useEffect(() => {
     if (!businessChecked && !loading) {
       dispatch(fetchBusiness());
     }
   }, [businessChecked, loading, dispatch]);
+
+  useEffect(() => {
+    if (business) {
+      dispatch(fetchBusinessDocuments());
+    }
+  }, [business, dispatch]);
 
   // Sync form with store business
   useEffect(() => {
@@ -75,6 +98,55 @@ export default function BusinessProfilePage() {
       // error is handled in slice and surfaced via `error`
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDocTypeChange = (e) => {
+    setDocType(e.target.value);
+    setDocsMessage("");
+  };
+
+  const handleDocFileChange = (e) => {
+    setDocFile(e.target.files?.[0] ?? null);
+    setDocsMessage("");
+  };
+
+  const handleUploadDocument = async (e) => {
+    e.preventDefault();
+    setDocsMessage("");
+
+    if (!docFile) {
+      setDocsMessage("Please select a file to upload.");
+      return;
+    }
+
+    const maxBytes = 5120 * 1024; // 5MB
+    if (docFile.size > maxBytes) {
+      setDocsMessage("File is too large. Maximum size is 5MB.");
+      return;
+    }
+
+    try {
+      await dispatch(
+        addBusinessDocument({ type: docType, file: docFile }),
+      ).unwrap();
+      setDocsMessage("Document uploaded successfully.");
+      setDocFile(null);
+      setDocType("registration_certificate");
+      toast.success("Document uploaded successfully.");
+    } catch {
+      // error is handled in slice/remote state
+    }
+  };
+
+  const handleDeleteDocument = async (id) => {
+    if (!window.confirm("Delete this document?")) return;
+
+    try {
+      await dispatch(removeBusinessDocument(id)).unwrap();
+      toast.success("Document deleted.");
+    } catch {
+      // error is handled in slice
     }
   };
 
@@ -302,6 +374,148 @@ export default function BusinessProfilePage() {
           </button>
         </div>
       </form>
+      {/* document upload */}
+      <div className="rounded-2xl bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-[#1e3a5f]">
+              Business documents
+            </h2>
+            <p className="mt-1 text-sm text-gray-500">
+              Upload required documents (max 5MB) to help verify your business.
+            </p>
+          </div>
+        </div>
+
+        {(docsError || docsMessage) && (
+          <div
+            className={`mt-4 rounded-lg px-4 py-3 text-sm ${
+              docsError
+                ? "bg-red-50 text-red-600"
+                : "bg-emerald-50 text-emerald-700"
+            }`}
+          >
+            {docsError ?? docsMessage}
+          </div>
+        )}
+
+        <form
+          onSubmit={handleUploadDocument}
+          className="mt-6 grid gap-4 md:grid-cols-2"
+        >
+          <div>
+            <label className="mb-1 block text-sm font-medium text-[#1e3a5f]">
+              Document type
+            </label>
+            <select
+              value={docType}
+              onChange={handleDocTypeChange}
+              className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#4da3ff] focus:ring-2 focus:ring-[#4da3ff]/20"
+            >
+              <option value="registration_certificate">
+                Registration certificate
+              </option>
+              <option value="tax_id">Tax ID</option>
+              <option value="utility_bill">Utility bill</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-[#1e3a5f]">
+              Upload file
+            </label>
+            <input
+              type="file"
+              accept="image/*,.pdf"
+              onChange={handleDocFileChange}
+              className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#4da3ff] focus:ring-2 focus:ring-[#4da3ff]/20"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Max size 5MB. Accepted formats: PDF, PNG, JPG.
+            </p>
+          </div>
+
+          <div className="md:col-span-2 flex items-center justify-end gap-3">
+            <button
+              type="submit"
+              disabled={docsUploading || docsLoading}
+              className="inline-flex items-center rounded-lg bg-[#1e3a5f] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#162d4a] disabled:opacity-50"
+            >
+              {docsUploading || docsLoading ? "Uploading…" : "Upload document"}
+            </button>
+          </div>
+        </form>
+
+        <div className="mt-6">
+          <h3 className="text-sm font-semibold text-[#1e3a5f]">
+            Uploaded documents
+          </h3>
+          {docsLoading && (
+            <div className="mt-3 flex items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#4da3ff] border-t-transparent" />
+            </div>
+          )}
+
+          {!docsLoading && documents.length === 0 && (
+            <div className="mt-3 rounded-lg bg-[#f5f7fa] px-4 py-3 text-sm text-gray-500">
+              No documents uploaded yet.
+            </div>
+          )}
+
+          {!docsLoading && documents.length > 0 && (
+            <div className="mt-3 space-y-3">
+              {documents.map((doc) => (
+                <div
+                  key={doc.id ?? `${doc.type}-${doc.created_at}`}
+                  className="flex flex-col gap-2 rounded-lg border border-[#eaf0fb] p-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="flex flex-col gap-1">
+                    <div className="text-sm font-medium text-[#1e3a5f]">
+                      {doc.type?.replace("_", " ")}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Uploaded{" "}
+                      {doc.created_at ? formatDate(doc.created_at) : "—"}
+                    </div>
+                    {doc.verified_at ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        Verified
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700">
+                        <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                        Pending
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {doc.file_path && (
+                      <a
+                        href={`http://kreditsu-api.test/storage/${doc.file_path}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-sm font-medium text-[#4da3ff] hover:underline"
+                      >
+                        View
+                      </a>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteDocument(doc.id)}
+                      disabled={docsDeleting}
+                      className="text-sm font-medium text-red-600 hover:text-red-700 disabled:opacity-50"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

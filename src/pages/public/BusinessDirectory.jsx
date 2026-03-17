@@ -96,7 +96,7 @@ const BusinessDirectory = () => {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((b) => (
               <div
-                key={b.id}
+                key={b.slug ?? b.id}
                 className="bg-white border border-[#eaf0fb] rounded-lg p-4 flex flex-col justify-between"
               >
                 <div>

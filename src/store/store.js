@@ -4,6 +4,7 @@ import businessReducer from "../features/businessSlices";
 import salesReducer from "../features/salesSlices";
 import expensesReducer from "../features/expensesSlices";
 import publicBusinessReducer from "../features/publicBusinessSlices";
+import businessDocumentsReducer from "../features/businessDocumentsSlices";
 
 export const store = configureStore({
   reducer: {
@@ -12,5 +13,6 @@ export const store = configureStore({
     sales: salesReducer,
     expenses: expensesReducer,
     publicBusiness: publicBusinessReducer,
+    businessDocuments: businessDocumentsReducer,
   },
 });
