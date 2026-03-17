@@ -157,7 +157,7 @@ export default function DashboardPage() {
                 .slice(0, 5)
                 .map((item, i) => (
                   <li
-                    key={item.id ?? `${item.type}-${i}-${item.amount}`}
+                    key={`${item.type}-${item.id ?? `${i}-${item.amount}`}`}
                     className="flex items-center justify-between rounded-lg border border-[#eaf0fb] px-3 py-2"
                   >
                     <div className="flex items-center gap-3">
