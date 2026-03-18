@@ -1,9 +1,5 @@
-const SUB_SCORES = [
-  { label: "Profile Completeness", max: 10 },
-  { label: "Transaction History", max: 40 },
-  { label: "Revenue", max: 30 },
-  { label: "Expense Management", max: 20 },
-];
+import { useEffect, useState } from "react";
+import { fetchScore } from "../../api/score.api";
 
 function getTier(score) {
   const n = Math.max(0, Math.min(100, Number(score) || 0));
@@ -12,22 +8,69 @@ function getTier(score) {
   return { label: "Bronze", color: "#cd7f32" };
 }
 
-function getSubScores(score) {
-  const total = Math.max(0, Math.min(100, Number(score) || 0));
-  const ratio = total / 100;
-  return SUB_SCORES.map(({ label, max }) => ({
-    label,
-    max,
-    earned: Math.round(ratio * max * 10) / 10,
-  }));
-}
+export default function KreditsuScoreCard() {
+  const [scoreData, setScoreData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-export default function KreditsuScoreCard({ score = 0 }) {
+  useEffect(() => {
+    const loadScore = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await fetchScore();
+        setScoreData(data);
+      } catch (err) {
+        setError(err.message || "Failed to fetch score");
+        console.error("Error fetching score:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadScore();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="rounded-2xl border border-[#eaf0fb] bg-white p-6 shadow-sm">
+        <div className="flex min-h-50 items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#4da3ff] border-t-transparent" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !scoreData) {
+    return (
+      <div className="rounded-2xl border border-[#eaf0fb] bg-white p-6 shadow-sm">
+        <div className="text-center text-sm text-red-600">
+          {error || "Failed to load score"}
+        </div>
+      </div>
+    );
+  }
+
+  const { score, breakdown } = scoreData;
   const numericScore = Math.max(0, Math.min(100, Number(score) || 0));
   const tier = getTier(numericScore);
-  const subScores = getSubScores(numericScore);
+
+  // Convert breakdown object to array for rendering
+  const subScores = Object.entries(breakdown).map(([key, item]) => ({
+    label: item.label || formatKeyToLabel(key),
+    points: item.points,
+    max: item.max,
+  }));
+
   const circumference = 2 * Math.PI * 42;
   const strokeDashoffset = circumference - (numericScore / 100) * circumference;
+
+  function formatKeyToLabel(key) {
+    return key
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  }
 
   return (
     <div className="rounded-2xl border border-[#eaf0fb] bg-white p-6 shadow-sm">
@@ -81,14 +124,14 @@ export default function KreditsuScoreCard({ score = 0 }) {
 
         {/* Sub-scores breakdown */}
         <div className="min-w-0 flex-1 space-y-3">
-          {subScores.map(({ label, max, earned }) => {
-            const pct = max > 0 ? (earned / max) * 100 : 0;
+          {subScores.map(({ label, max, points }) => {
+            const pct = max > 0 ? (points / max) * 100 : 0;
             return (
               <div key={label} className="space-y-1">
                 <div className="flex justify-between text-xs">
                   <span className="font-medium text-[#1e3a5f]">{label}</span>
                   <span className="text-gray-500">
-                    {earned.toFixed(1)} / {max}
+                    {points} / {max}
                   </span>
                 </div>
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#f5f7fa]">

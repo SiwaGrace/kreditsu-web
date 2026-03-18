@@ -241,7 +241,7 @@ export default function BusinessProfilePage() {
         </button>
       </div>
 
-      <KreditsuScoreCard score={business.kreditsu_score ?? 0} />
+      <KreditsuScoreCard />
 
       {error && (
         <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
