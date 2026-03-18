@@ -3,7 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { fetchSales } from "../../features/salesSlices";
 import { fetchExpenses } from "../../features/expensesSlices";
+import { fetchBusinessSnapshots } from "../../features/businessSnapshotsSlices";
 import StatCard from "../../components/ui/StatCard";
+import RevenueChart from "../../components/ui/RevenueChart";
 
 function formatCurrency(num) {
   return new Intl.NumberFormat("en-GH", {
@@ -31,10 +33,12 @@ export default function DashboardPage() {
   } = useSelector((state) => state.business);
   const { items: sales } = useSelector((state) => state.sales);
   const { items: expenses } = useSelector((state) => state.expenses);
+  const { items: snapshots } = useSelector((state) => state.businessSnapshots);
 
   useEffect(() => {
     dispatch(fetchSales());
     dispatch(fetchExpenses());
+    dispatch(fetchBusinessSnapshots());
   }, [dispatch]);
 
   const score = business?.kreditsu_score ?? 0;
@@ -194,6 +198,21 @@ export default function DashboardPage() {
                 ))}
             </ul>
           )}
+        </div>
+      </div>
+
+      {/* Revenue Trend Chart */}
+      <div className="rounded-xl border border-[#eaf0fb] bg-white shadow-sm">
+        <div className="border-b border-[#eaf0fb] px-5 py-4">
+          <h2 className="text-sm font-semibold text-[#1e3a5f]">
+            Revenue Trend
+          </h2>
+          <p className="mt-0.5 text-xs text-gray-500">
+            Monthly sales, expenses, and net profit
+          </p>
+        </div>
+        <div className="p-5">
+          <RevenueChart snapshots={snapshots} />
         </div>
       </div>
     </div>

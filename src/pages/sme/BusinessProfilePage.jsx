@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
+import { FiDownload } from "react-icons/fi";
 import { editBusiness, fetchBusiness } from "../../features/businessSlices";
 import {
   fetchBusinessDocuments,
   addBusinessDocument,
   removeBusinessDocument,
 } from "../../features/businessDocumentsSlices";
+import { fetchBusinessSnapshots } from "../../features/businessSnapshotsSlices";
 import KreditsuScoreCard from "../../components/ui/KreditsuScoreCard";
 import { formatDate } from "../../utils/formatDate";
 
@@ -21,6 +23,7 @@ export default function BusinessProfilePage() {
     deleteLoading: docsDeleting,
     error: docsError,
   } = useSelector((state) => state.businessDocuments);
+  const { items: snapshots } = useSelector((state) => state.businessSnapshots);
 
   const [formValues, setFormValues] = useState({
     name: "",
@@ -52,6 +55,7 @@ export default function BusinessProfilePage() {
   useEffect(() => {
     if (business) {
       dispatch(fetchBusinessDocuments());
+      dispatch(fetchBusinessSnapshots());
     }
   }, [business, dispatch]);
 
@@ -150,6 +154,49 @@ export default function BusinessProfilePage() {
     }
   };
 
+  const handleDownloadReport = () => {
+    if (!snapshots || snapshots.length === 0) {
+      toast.error("No data available for report.");
+      return;
+    }
+
+    // Create CSV from snapshots
+    const headers = [
+      "Month",
+      "Total Sales",
+      "Total Expenses",
+      "Net Profit",
+      "Transactions",
+    ];
+    const rows = snapshots
+      .sort((a, b) => new Date(b.month) - new Date(a.month))
+      .map((s) => [
+        s.month,
+        s.total_sales || 0,
+        s.total_expenses || 0,
+        s.net_profit || 0,
+        s.transaction_count || 0,
+      ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.join(",")),
+    ].join("\n");
+
+    // Download CSV
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${business.name || "business"}-report-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+
+    toast.success("Report downloaded successfully.");
+  };
+
   if (!businessChecked || loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
@@ -174,14 +221,24 @@ export default function BusinessProfilePage() {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-[#1e3a5f]">
-          My business profile
-        </h1>
-        <p className="mt-1 text-sm text-gray-500">
-          View and update your core business details. These help lenders and
-          partners understand who you are.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-[#1e3a5f]">
+            My business profile
+          </h1>
+          <p className="mt-1 text-sm text-gray-500">
+            View and update your core business details. These help lenders and
+            partners understand who you are.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleDownloadReport}
+          className="inline-flex items-center gap-2 rounded-lg bg-[#1e3a5f] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#162d4a] transition-colors"
+        >
+          <FiDownload size={16} />
+          Download Report
+        </button>
       </div>
 
       <KreditsuScoreCard score={business.kreditsu_score ?? 0} />
