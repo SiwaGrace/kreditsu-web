@@ -18,12 +18,28 @@ const BusinessProfile = () => {
   const dispatch = useDispatch();
   const { business, isActiveTrader, businessLoading, businessError } =
     useSelector((state) => state.publicBusiness);
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { lastFetchedAt: scoreUpdatedAt } = useSelector((state) => state.score);
   const [copied, setCopied] = useState(false);
-  console.log(business);
   useEffect(() => {
     if (slug) {
       dispatch(fetchPublicBusinessBySlug(slug));
     }
+  }, [dispatch, slug]);
+
+  // Refresh profile whenever score recalculates (logged-in flows) or window regains focus.
+  useEffect(() => {
+    if (slug && isAuthenticated && scoreUpdatedAt) {
+      dispatch(fetchPublicBusinessBySlug(slug));
+    }
+  }, [dispatch, slug, isAuthenticated, scoreUpdatedAt]);
+
+  useEffect(() => {
+    const onFocus = () => {
+      if (slug) dispatch(fetchPublicBusinessBySlug(slug));
+    };
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
   }, [dispatch, slug]);
 
   const copyLink = () => {

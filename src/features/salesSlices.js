@@ -2,6 +2,10 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { createSale, listSales } from "../api/sales.api";
 import { fetchBusiness } from "./businessSlices";
 import { fetchScore } from "./scoreSlices";
+import {
+  fetchPublicBusinesses,
+  fetchPublicBusinessBySlug,
+} from "./publicBusinessSlices";
 
 // ─── Thunks ────────────
 export const fetchSales = createAsyncThunk(
@@ -31,6 +35,11 @@ export const addSale = createAsyncThunk(
       thunkAPI.dispatch(fetchSales());
       thunkAPI.dispatch(fetchBusiness());
       thunkAPI.dispatch(fetchScore());
+
+      // If the business is public, refresh public views too.
+      const slug = thunkAPI.getState()?.business?.business?.slug;
+      if (slug) thunkAPI.dispatch(fetchPublicBusinessBySlug(slug));
+      thunkAPI.dispatch(fetchPublicBusinesses(1));
       return data;
     } catch (err) {
       return thunkAPI.rejectWithValue(

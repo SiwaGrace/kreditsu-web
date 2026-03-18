@@ -5,7 +5,10 @@ import {
   updateBusiness,
 } from "../api/business.api";
 import { fetchScore } from "./scoreSlices";
-import { fetchPublicBusinessBySlug, fetchPublicBusinesses } from "./publicBusinessSlices";
+import {
+  fetchPublicBusinessBySlug,
+  fetchPublicBusinesses,
+} from "./publicBusinessSlices";
 
 // ─── Thunks ────────────
 export const fetchBusiness = createAsyncThunk(

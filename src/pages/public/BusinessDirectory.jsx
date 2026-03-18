@@ -15,12 +15,27 @@ export default function BusinessDirectory() {
   const { list, listLoading, listError } = useSelector(
     (state) => state.publicBusiness,
   );
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { lastFetchedAt: scoreUpdatedAt } = useSelector((state) => state.score);
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
 
   useEffect(() => {
     dispatch(fetchPublicBusinesses(1));
+  }, [dispatch]);
+
+  // Refresh directory whenever score recalculates (logged-in flows) or window regains focus.
+  useEffect(() => {
+    if (isAuthenticated && scoreUpdatedAt) {
+      dispatch(fetchPublicBusinesses(1));
+    }
+  }, [dispatch, isAuthenticated, scoreUpdatedAt]);
+
+  useEffect(() => {
+    const onFocus = () => dispatch(fetchPublicBusinesses(1));
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
   }, [dispatch]);
 
   const industries = useMemo(() => {
