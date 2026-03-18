@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { fetchScore } from "../../api/score.api";
+import { useEffect, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchScore } from "../../features/scoreSlices";
 
 function getTier(score) {
   const n = Math.max(0, Math.min(100, Number(score) || 0));
@@ -8,28 +9,38 @@ function getTier(score) {
   return { label: "Bronze", color: "#cd7f32" };
 }
 
+function formatKeyToLabel(key) {
+  return String(key)
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 export default function KreditsuScoreCard() {
-  const [scoreData, setScoreData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { hasBusiness } = useSelector((state) => state.business);
+  const { score, breakdown, loading, error } = useSelector(
+    (state) => state.score,
+  );
+
+  const numericScore = Math.max(0, Math.min(100, Number(score) || 0));
+  const tier = getTier(numericScore);
+  const subScores = useMemo(() => {
+    if (!breakdown) return [];
+    return Object.entries(breakdown).map(([key, item]) => ({
+      key,
+      label: item?.label || formatKeyToLabel(key),
+      points: Number(item?.points ?? 0),
+      max: Number(item?.max ?? 0),
+    }));
+  }, [breakdown]);
 
   useEffect(() => {
-    const loadScore = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await fetchScore();
-        setScoreData(data);
-      } catch (err) {
-        setError(err.message || "Failed to fetch score");
-        console.error("Error fetching score:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadScore();
-  }, []);
+    if (isAuthenticated && hasBusiness && !loading && score === null) {
+      dispatch(fetchScore());
+    }
+  }, [dispatch, isAuthenticated, hasBusiness, loading, score]);
 
   if (loading) {
     return (
@@ -41,7 +52,7 @@ export default function KreditsuScoreCard() {
     );
   }
 
-  if (error || !scoreData) {
+  if (error || score === null) {
     return (
       <div className="rounded-2xl border border-[#eaf0fb] bg-white p-6 shadow-sm">
         <div className="text-center text-sm text-red-600">
@@ -51,26 +62,8 @@ export default function KreditsuScoreCard() {
     );
   }
 
-  const { score, breakdown } = scoreData;
-  const numericScore = Math.max(0, Math.min(100, Number(score) || 0));
-  const tier = getTier(numericScore);
-
-  // Convert breakdown object to array for rendering
-  const subScores = Object.entries(breakdown).map(([key, item]) => ({
-    label: item.label || formatKeyToLabel(key),
-    points: item.points,
-    max: item.max,
-  }));
-
   const circumference = 2 * Math.PI * 42;
   const strokeDashoffset = circumference - (numericScore / 100) * circumference;
-
-  function formatKeyToLabel(key) {
-    return key
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  }
 
   return (
     <div className="rounded-2xl border border-[#eaf0fb] bg-white p-6 shadow-sm">
@@ -124,10 +117,10 @@ export default function KreditsuScoreCard() {
 
         {/* Sub-scores breakdown */}
         <div className="min-w-0 flex-1 space-y-3">
-          {subScores.map(({ label, max, points }) => {
+          {subScores.map(({ key, label, max, points }) => {
             const pct = max > 0 ? (points / max) * 100 : 0;
             return (
-              <div key={label} className="space-y-1">
+              <div key={key} className="space-y-1">
                 <div className="flex justify-between text-xs">
                   <span className="font-medium text-[#1e3a5f]">{label}</span>
                   <span className="text-gray-500">
@@ -143,6 +136,9 @@ export default function KreditsuScoreCard() {
               </div>
             );
           })}
+          {subScores.length === 0 && (
+            <div className="text-xs text-gray-500">Breakdown unavailable.</div>
+          )}
         </div>
       </div>
     </div>

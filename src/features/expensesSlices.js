@@ -1,5 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { createExpense, listExpenses } from "../api/expenses.api";
+import { fetchBusiness } from "./businessSlices";
+import { fetchScore } from "./scoreSlices";
 
 // ─── Thunks ────────────
 export const fetchExpenses = createAsyncThunk(
@@ -25,6 +27,10 @@ export const addExpense = createAsyncThunk(
         date: expenseData.date || new Date().toISOString().slice(0, 10),
       };
       const data = await createExpense(payload);
+      // Keep derived state in sync without reload.
+      thunkAPI.dispatch(fetchExpenses());
+      thunkAPI.dispatch(fetchBusiness());
+      thunkAPI.dispatch(fetchScore());
       return data;
     } catch (err) {
       return thunkAPI.rejectWithValue(
@@ -59,10 +65,13 @@ export const expensesSlice = createSlice({
       })
       .addCase(fetchExpenses.fulfilled, (state, action) => {
         state.loading = false;
-        state.items =
-          Array.isArray(action.payload?.expenses) ?? action.payload?.expenses
-            ? action.payload.expenses
-            : action.payload ?? [];
+        if (Array.isArray(action.payload?.expenses)) {
+          state.items = action.payload.expenses;
+        } else if (Array.isArray(action.payload)) {
+          state.items = action.payload;
+        } else {
+          state.items = [];
+        }
       })
       .addCase(fetchExpenses.rejected, (state, action) => {
         state.loading = false;

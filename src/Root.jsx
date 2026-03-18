@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUser } from "./features/auth/authSlices";
 import { fetchBusiness } from "./features/businessSlices";
+import { fetchScore } from "./features/scoreSlices";
 import PageLoader from "./components/common/PageLoader";
 
 const Root = () => {
@@ -16,7 +17,10 @@ const Root = () => {
       const result = await dispatch(fetchUser());
       // only fetch business if user is authenticated
       if (result.meta.requestStatus === "fulfilled") {
-        dispatch(fetchBusiness());
+        const biz = await dispatch(fetchBusiness());
+        if (biz.meta.requestStatus === "fulfilled") {
+          dispatch(fetchScore());
+        }
       }
     };
 

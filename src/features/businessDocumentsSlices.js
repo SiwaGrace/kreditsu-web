@@ -11,7 +11,6 @@ export const fetchBusinessDocuments = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const data = await listBusinessDocuments();
-      console.log(data.business_documents);
       return data;
     } catch (err) {
       return thunkAPI.rejectWithValue(

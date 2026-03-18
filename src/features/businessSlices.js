@@ -4,6 +4,8 @@ import {
   createBusiness,
   updateBusiness,
 } from "../api/business.api";
+import { fetchScore } from "./scoreSlices";
+import { fetchPublicBusinessBySlug, fetchPublicBusinesses } from "./publicBusinessSlices";
 
 // ─── Thunks ────────────
 export const fetchBusiness = createAsyncThunk(
@@ -46,6 +48,16 @@ export const editBusiness = createAsyncThunk(
   async (businessData, thunkAPI) => {
     try {
       const data = await updateBusiness(businessData);
+      // Owner view
+      thunkAPI.dispatch(fetchBusiness());
+      thunkAPI.dispatch(fetchScore());
+
+      // public view
+      const slug = data.business?.slug;
+      if (slug) {
+        thunkAPI.dispatch(fetchPublicBusinessBySlug(slug));
+        thunkAPI.dispatch(fetchPublicBusinesses(1)); // Refresh directory list
+      }
       return data;
     } catch (err) {
       return thunkAPI.rejectWithValue(
@@ -90,12 +102,12 @@ export const businessSlice = createSlice({
         state.businessChecked = false; // ← reset while re-fetching
       })
       .addCase(fetchBusiness.fulfilled, (state, action) => {
-        if (!action.payload) return; // ← guard against undefined payload
-        state.business = action.payload.business ?? null;
-        state.totalSales = action.payload.total_sales ?? 0;
-        state.totalExpenses = action.payload.total_expenses ?? 0;
-        state.net = action.payload.net ?? 0;
-        state.hasBusiness = true;
+        const payload = action.payload ?? {};
+        state.business = payload.business ?? null;
+        state.totalSales = payload.total_sales ?? 0;
+        state.totalExpenses = payload.total_expenses ?? 0;
+        state.net = payload.net ?? 0;
+        state.hasBusiness = Boolean(state.business);
         state.businessChecked = true;
         state.loading = false;
       })

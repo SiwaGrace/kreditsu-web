@@ -6,6 +6,7 @@ import expensesReducer from "../features/expensesSlices";
 import publicBusinessReducer from "../features/publicBusinessSlices";
 import businessDocumentsReducer from "../features/businessDocumentsSlices";
 import businessSnapshotsReducer from "../features/businessSnapshotsSlices";
+import scoreReducer from "../features/scoreSlices";
 
 export const store = configureStore({
   reducer: {
@@ -16,5 +17,6 @@ export const store = configureStore({
     publicBusiness: publicBusinessReducer,
     businessDocuments: businessDocumentsReducer,
     businessSnapshots: businessSnapshotsReducer,
+    score: scoreReducer,
   },
 });

@@ -6,13 +6,20 @@ import { FiLink, FiCheck, FiFileText, FiLogIn } from "react-icons/fi";
 import { fetchPublicBusinessBySlug } from "../../features/publicBusinessSlices";
 import { formatDate } from "../../utils/formatDate";
 
+function getTier(score) {
+  const n = Math.max(0, Math.min(100, Number(score) || 0));
+  if (n >= 70) return { label: "Gold", color: "#c9a84c" };
+  if (n >= 40) return { label: "Silver", color: "#a8a9ad" };
+  return { label: "Bronze", color: "#cd7f32" };
+}
+
 const BusinessProfile = () => {
   const { slug } = useParams();
   const dispatch = useDispatch();
   const { business, isActiveTrader, businessLoading, businessError } =
     useSelector((state) => state.publicBusiness);
   const [copied, setCopied] = useState(false);
-
+  console.log(business);
   useEffect(() => {
     if (slug) {
       dispatch(fetchPublicBusinessBySlug(slug));
@@ -57,6 +64,12 @@ const BusinessProfile = () => {
       </div>
     );
   }
+
+  const numericScore = Math.max(
+    0,
+    Math.min(100, Number(business.kreditsu_score ?? business.score ?? 0) || 0),
+  );
+  const tier = getTier(numericScore);
 
   return (
     <div className="bg-[#f5f7fa] min-h-screen py-8 px-4">
@@ -108,28 +121,27 @@ const BusinessProfile = () => {
           <h2 className="text-lg font-semibold text-[#1e3a5f]">
             Kreditsu Score
           </h2>
-          <div className="mt-2 flex items-center">
+          <div className="mt-2 flex items-center gap-2">
             <span className="text-2xl font-bold text-[#1e3a5f]">
-              {business.kreditsu_score}
+              {Math.round(numericScore)}
             </span>
-            <span className="ml-1 text-gray-600">/100</span>
+            <span className="text-gray-600">/100</span>
+            <span
+              className="ml-2 rounded-full px-2.5 py-0.5 text-xs font-semibold text-white"
+              style={{ backgroundColor: tier.color }}
+            >
+              {tier.label}
+            </span>
           </div>
           <div className="w-full bg-[#eaf0fb] rounded-full h-2 mt-2">
             <div
-              className="bg-[#c9a84c] h-2 rounded-full"
-              style={{ width: `${business.kreditsu_score}%` }}
+              className="bg-[#4da3ff] h-2 rounded-full"
+              style={{ width: `${numericScore}%` }}
             ></div>
           </div>
-          <div className="mt-2 text-sm font-semibold text-[#1e3a5f]">
-            {business.kreditsu_score >= 80
-              ? "Gold Member"
-              : business.kreditsu_score >= 60
-                ? "Silver Member"
-                : "Bronze Member"}
-          </div>
           <p className="mt-1 text-gray-600 text-xs">
-            This score is calculated from transaction history, profile
-            completeness, and verification status
+            This score is calculated by Kreditsu based on business identity and
+            financial activity signals.
           </p>
         </div>
 
@@ -202,7 +214,11 @@ const BusinessProfile = () => {
               <li className="flex items-center">
                 <FaGlobe className="mr-2 text-[#1e3a5f]" />
                 <a
-                  href={`http://${business.website}`}
+                  href={
+                    business.website.startsWith("http")
+                      ? business.website
+                      : `https://${business.website}`
+                  }
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#4da3ff] hover:underline"

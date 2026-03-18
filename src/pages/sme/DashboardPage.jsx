@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { fetchSales } from "../../features/salesSlices";
 import { fetchExpenses } from "../../features/expensesSlices";
 import { fetchBusinessSnapshots } from "../../features/businessSnapshotsSlices";
+import { fetchScore } from "../../features/scoreSlices";
 import StatCard from "../../components/ui/StatCard";
 import RevenueChart from "../../components/ui/RevenueChart";
 
@@ -34,15 +35,17 @@ export default function DashboardPage() {
   const { items: sales } = useSelector((state) => state.sales);
   const { items: expenses } = useSelector((state) => state.expenses);
   const { items: snapshots } = useSelector((state) => state.businessSnapshots);
+  const { score } = useSelector((state) => state.score);
 
   useEffect(() => {
     dispatch(fetchSales());
     dispatch(fetchExpenses());
     dispatch(fetchBusinessSnapshots());
+    dispatch(fetchScore());
   }, [dispatch]);
 
-  const score = business?.kreditsu_score ?? 0;
-  const tier = getScoreTier(score);
+  const numericScore = Number(score) || 0;
+  const tier = getScoreTier(numericScore);
 
   const quickLinks = [
     { to: "/my-business", label: "My Business", desc: "Profile & details" },
@@ -69,7 +72,7 @@ export default function DashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Kreditsu Score"
-          value={Math.round(score)}
+          value={Math.round(numericScore)}
           subtitle={
             <span>
               Tier:{" "}
