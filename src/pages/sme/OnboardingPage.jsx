@@ -6,7 +6,9 @@ import { registerBusiness } from "../../features/businessSlices";
 export default function OnboardingPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { createLoading, error } = useSelector((state) => state.business);
+  const { createLoading, error, hasBusiness } = useSelector(
+    (state) => state.business,
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -89,6 +91,17 @@ export default function OnboardingPage() {
           >
             {createLoading ? "Creating…" : "Create business"}
           </button>
+          {hasBusiness && (
+            <p className="text-sm text-gray-400 mt-1">
+              You already have a business.{" "}
+              <a
+                href="/dashboard"
+                className="text-primaryBrand hover:text-primaryBrand/80 transition-colors"
+              >
+                Go to dashboard
+              </a>
+            </p>
+          )}
         </form>
       </div>
     </div>
