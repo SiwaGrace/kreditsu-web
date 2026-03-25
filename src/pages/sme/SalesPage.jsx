@@ -54,7 +54,7 @@ export default function SalesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-[#1e3a5f]">Sales</h1>
           <p className="mt-1 text-sm text-gray-500">
@@ -64,7 +64,7 @@ export default function SalesPage() {
         <button
           type="button"
           onClick={handleOpenModal}
-          className="rounded-lg bg-[#1e3a5f] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#162d4a]"
+          className="shrink-0 rounded-lg bg-[#1e3a5f] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#162d4a]"
         >
           + Record sale
         </button>

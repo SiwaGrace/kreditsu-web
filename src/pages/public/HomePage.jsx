@@ -8,7 +8,7 @@ const HomePage = () => {
         <div className="mx-auto max-w-6xl px-4 py-10 sm:py-16 lg:py-20 sm:px-6 lg:px-8 grid gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] items-center">
           {/* Hero copy */}
           <div className="space-y-6">
-            <p className="inline-flex items-center gap-2 rounded-full border border-dividerBorder bg-neutralColor/60 px-3 py-1 text-xs font-medium text-secondaryText">
+            <p className="inline-flex max-w-full flex-wrap items-center gap-2 rounded-full border border-dividerBorder bg-neutralColor/60 px-3 py-1 text-xs font-medium text-secondaryText">
               Built for SMEs
               <span className="h-1 w-1 rounded-full bg-secondaryBrand" />
               Unlock credit & procurement
@@ -50,24 +50,24 @@ const HomePage = () => {
           </div>
 
           {/* Right side visual */}
-          <div className="relative">
-            <div className="absolute -inset-6 -z-10 rounded-3xl bg-accentColor/10 blur-2xl" />
+          <div className="relative overflow-hidden">
+            <div className="absolute inset-0 -z-10 rounded-3xl bg-accentColor/10 blur-2xl" />
             <div className="rounded-3xl border border-dividerBorder bg-neutralColor shadow-lg shadow-primaryBrand/10 p-5 space-y-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+                <div className="min-w-0 flex items-center gap-3">
                   <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primaryBrand text-primaryColor text-sm font-semibold">
                     MC
                   </span>
-                  <div>
-                    <p className="text-sm font-semibold text-primaryText">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-primaryText">
                       Mama Cee Groceries
                     </p>
-                    <p className="text-xs text-secondaryText">
+                    <p className="truncate text-xs text-secondaryText">
                       Retail · Accra, Ghana
                     </p>
                   </div>
                 </div>
-                <span className="rounded-full bg-secondaryBrand/10 px-3 py-1 text-[11px] font-medium text-secondaryBrand">
+                <span className="ml-3 shrink-0 rounded-full bg-secondaryBrand/10 px-3 py-1 text-[11px] font-medium text-secondaryBrand">
                   Verified
                 </span>
               </div>
@@ -100,7 +100,7 @@ const HomePage = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-1">
+              <div className="flex items-center justify-between gap-3 pt-1">
                 <div className="flex -space-x-2">
                   <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-primaryColor bg-surfaceColor text-[11px] text-primaryBrand">
                     JD
@@ -112,7 +112,7 @@ const HomePage = () => {
                     +
                   </span>
                 </div>
-                <p className="text-[11px] text-secondaryText">
+                <p className="shrink-0 text-[11px] text-secondaryText">
                   Credit profile active
                 </p>
               </div>
